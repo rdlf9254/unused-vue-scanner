@@ -9,7 +9,22 @@ def search_string_in_file(string, file_path):
             return True
     return False
 
+def create_components_to_search_json(project_directory):
+    vue_files = []
+    for root, dirs, files in os.walk(project_directory):
+        for file in files:
+            if file.endswith('.vue'):
+                vue_files.append(file)
+
+    components_to_search = {'SEARCH_THIS': vue_files}
+
+    components_file_path = os.path.join(project_directory, 'COMPONENTS_TO_SEARCH.json')
+    with open(components_file_path, 'w', encoding='utf-8') as file:
+        json.dump(components_to_search, file, ensure_ascii=False, indent=4)
+
 def main(project_directory):
+
+    create_components_to_search_json(project_directory)
 
     components_file_path = os.path.join(project_directory, 'COMPONENTS_TO_SEARCH.json')
     vue_files_path = os.path.join(project_directory, 'VUE_FILES.json')
