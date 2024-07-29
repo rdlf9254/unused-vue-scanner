@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 
 def search_string_in_file(string, file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -8,12 +9,15 @@ def search_string_in_file(string, file_path):
             return True
     return False
 
-def main():
+def main(project_directory):
 
-    with open('COMPONENTS_TO_SEARCH.json', 'r', encoding='utf-8') as file:
+    components_file_path = os.path.join(project_directory, 'COMPONENTS_TO_SEARCH.json')
+    vue_files_path = os.path.join(project_directory, 'VUE_FILES.json')
+    
+    with open(components_file_path, 'r', encoding='utf-8') as file:
         components_to_search = json.load(file)
 
-    with open('VUE_FILES.json', 'r', encoding='utf-8') as file:
+    with open(vue_files_path, 'r', encoding='utf-8') as file:
         vue_files = json.load(file)
 
     components_forgotten = []
@@ -21,17 +25,22 @@ def main():
     for component in components_to_search['SEARCH_THIS']:
         found = False
         for vue_file in vue_files['VUE_FILES']:
-            if search_string_in_file(component, vue_file):
+            vue_file_path = os.path.join(project_directory, vue_file)
+            if search_string_in_file(component, vue_file_path):
                 found = True
                 break
         if not found:
             components_forgotten.append(component)
 
-    with open('COMPONENTS_FORGOTTEN.json', 'w', encoding='utf-8') as file:
+    forgotten_components_path = os.path.join(project_directory, 'COMPONENTS_FORGOTTEN.json')
+    with open(forgotten_components_path, 'w', encoding='utf-8') as file:
         json.dump({'FORGOTTEN_COMPONENTS': components_forgotten}, file, ensure_ascii=False, indent=4)
 
-    print("Processo concluído. Verifique COMPONENTS_FORGOTTEN.json para os componentes não encontrados.")
-
+    print(f"Processo concluído. Verifique {forgotten_components_path} para os componentes não encontrados.")
 
 if __name__ == '__main__':
-  main()
+    parser = argparse.ArgumentParser(description='Analisa arquivos .vue em um projeto Vue.js para identificar arquivos não utilizados ou esquecidos.')
+    parser.add_argument('project_directory', type=str, help='O diretório do projeto Vue a ser analisado.')
+    args = parser.parse_args()
+    
+    main(args.project_directory)
